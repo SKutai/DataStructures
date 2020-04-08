@@ -1,7 +1,11 @@
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 
 public class MyMergeSort extends RecursiveAction{ //
@@ -29,22 +33,24 @@ public class MyMergeSort extends RecursiveAction{ //
                 nums2[x] = z;
             }
 
+            
             startTime = System.nanoTime();
             mergeSort(nums, len);
             endTime = System.nanoTime();
 
             duration = endTime - startTime;
-            System.out.println("Regular: " + duration);
+            System.out.println("Single: " + duration);
 
 
-            MyMergeSort MMS = new MyMergeSort(nums2, nums.length);
+            MyMergeSort MMS = new MyMergeSort(nums2, nums2.length);
             
             startTime = System.nanoTime();
-            MMS.compute();
+            MMS.invokeAll();
             endTime = System.nanoTime();
 
             duration = endTime - startTime;
-            System.out.println("Compute: " + duration);
+            System.out.println("Multi: " + duration);
+
         }
 
         s.close();
@@ -52,15 +58,17 @@ public class MyMergeSort extends RecursiveAction{ //
 
     public int[] a;
     public int n;
+    public static List<MyMergeSort> sub = new ArrayList<MyMergeSort>();
+
 
     public MyMergeSort(int[] a, int n) {
-        // store the merge variables or the mergeSort variables
         this.a = a;
         this.n = n;
     }
 
     
     public void compute(){
+        
         if (n < 2) {
             return;
         }
@@ -69,7 +77,6 @@ public class MyMergeSort extends RecursiveAction{ //
         int[] l = new int[mid];
         int[] r = new int[n - mid];
         
-        
         for (int i = 0; i < mid; i++) {
             l[i] = a[i];
         }
@@ -77,9 +84,16 @@ public class MyMergeSort extends RecursiveAction{ //
             r[i - mid] = a[i];
         }
 
-        invokeAll(new MyMergeSort(l, mid), new MyMergeSort(r, n - mid));
         
+        sub.add(new MyMergeSort(l, mid));
+        sub.add(new MyMergeSort(r, n - mid));
+        
+        for(RecursiveAction subtask : sub){
+            subtask.fork();
+        }
+
         merge(a, l, r, mid, n - mid);
+        
     }
     
 
