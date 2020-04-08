@@ -17,6 +17,7 @@ public class MyMergeSort extends RecursiveAction{ //
         
         while(s.hasNextLine()) {
             //TODO:read in the file from stdin , run mergesort, and time it.
+            
             String[] sNums = s.nextLine().split(" ");
             int len = sNums.length;
             int z;
@@ -45,7 +46,7 @@ public class MyMergeSort extends RecursiveAction{ //
             MyMergeSort MMS = new MyMergeSort(nums2, nums2.length);
             
             startTime = System.nanoTime();
-            MMS.invokeAll();
+            MMS.compute();
             endTime = System.nanoTime();
 
             duration = endTime - startTime;
@@ -58,8 +59,6 @@ public class MyMergeSort extends RecursiveAction{ //
 
     public int[] a;
     public int n;
-    public static List<MyMergeSort> sub = new ArrayList<MyMergeSort>();
-
 
     public MyMergeSort(int[] a, int n) {
         this.a = a;
@@ -68,7 +67,6 @@ public class MyMergeSort extends RecursiveAction{ //
 
     
     public void compute(){
-        
         if (n < 2) {
             return;
         }
@@ -83,17 +81,10 @@ public class MyMergeSort extends RecursiveAction{ //
         for (int i = mid; i < n; i++) {
             r[i - mid] = a[i];
         }
-
+    
+        invokeAll(new MyMergeSort(l, mid), new MyMergeSort(r, n - mid));
         
-        sub.add(new MyMergeSort(l, mid));
-        sub.add(new MyMergeSort(r, n - mid));
-        
-        for(RecursiveAction subtask : sub){
-            subtask.fork();
-        }
-
         merge(a, l, r, mid, n - mid);
-        
     }
     
 
